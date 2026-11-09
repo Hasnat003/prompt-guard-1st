@@ -1,0 +1,7 @@
+{
+  "name": "PromptGuard - AI Security Scanner & Middleware",
+  "description": "AI-powered prompt security scanner, multi-label threat detection engine, and protection middleware for LLM applications.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

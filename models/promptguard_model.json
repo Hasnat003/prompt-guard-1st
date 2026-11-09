@@ -1,0 +1,18 @@
+{
+  "model_type": "MultiOutputClassifier(LogisticRegression) + TfidfVectorizer",
+  "labels": [
+    "prompt_injection",
+    "jailbreak",
+    "sensitive_data",
+    "malicious_intent"
+  ],
+  "vocabulary_size": 2067,
+  "biases": [
+    -0.953101838435311,
+    -1.0089765908568222,
+    -0.9307297995783922,
+    -1.1327764445269561
+  ],
+  "macro_f1": 0.9936,
+  "created_at": "2026-11-09 07:41:24"
+}

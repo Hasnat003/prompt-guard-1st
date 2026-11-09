@@ -1,0 +1,60 @@
+{
+  "evaluation_time": "2026-11-09 07:41:24",
+  "dataset": "dataset/promptguard_dataset.csv",
+  "total_samples": 420,
+  "test_samples": 84,
+  "macro_f1": 0.9936,
+  "micro_f1": 0.9939,
+  "macro_precision": 0.9875,
+  "macro_recall": 1.0,
+  "per_label_metrics": {
+    "prompt_injection": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "confusion_matrix": {
+        "tp": 24,
+        "tn": 60,
+        "fp": 0,
+        "fn": 0
+      },
+      "support": 24
+    },
+    "jailbreak": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "confusion_matrix": {
+        "tp": 20,
+        "tn": 64,
+        "fp": 0,
+        "fn": 0
+      },
+      "support": 20
+    },
+    "sensitive_data": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "confusion_matrix": {
+        "tp": 18,
+        "tn": 66,
+        "fp": 0,
+        "fn": 0
+      },
+      "support": 18
+    },
+    "malicious_intent": {
+      "precision": 0.95,
+      "recall": 1.0,
+      "f1": 0.9744,
+      "confusion_matrix": {
+        "tp": 19,
+        "tn": 64,
+        "fp": 1,
+        "fn": 0
+      },
+      "support": 19
+    }
+  }
+}
