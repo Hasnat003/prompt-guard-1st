@@ -1,60 +1,60 @@
 {
-  "evaluation_time": "2026-11-09 07:41:24",
+  "evaluation_time": "2026-11-09 19:17:20",
   "dataset": "dataset/promptguard_dataset.csv",
-  "total_samples": 420,
-  "test_samples": 84,
-  "macro_f1": 0.9936,
-  "micro_f1": 0.9939,
-  "macro_precision": 0.9875,
+  "total_samples": 1244,
+  "test_samples": 249,
+  "macro_f1": 0.9895,
+  "micro_f1": 0.9903,
+  "macro_precision": 0.9793,
   "macro_recall": 1.0,
   "per_label_metrics": {
     "prompt_injection": {
-      "precision": 1.0,
+      "precision": 0.9873,
       "recall": 1.0,
-      "f1": 1.0,
+      "f1": 0.9936,
       "confusion_matrix": {
-        "tp": 24,
-        "tn": 60,
-        "fp": 0,
-        "fn": 0
-      },
-      "support": 24
-    },
-    "jailbreak": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "confusion_matrix": {
-        "tp": 20,
-        "tn": 64,
-        "fp": 0,
-        "fn": 0
-      },
-      "support": 20
-    },
-    "sensitive_data": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "confusion_matrix": {
-        "tp": 18,
-        "tn": 66,
-        "fp": 0,
-        "fn": 0
-      },
-      "support": 18
-    },
-    "malicious_intent": {
-      "precision": 0.95,
-      "recall": 1.0,
-      "f1": 0.9744,
-      "confusion_matrix": {
-        "tp": 19,
-        "tn": 64,
+        "tp": 78,
+        "tn": 170,
         "fp": 1,
         "fn": 0
       },
-      "support": 19
+      "support": 78
+    },
+    "jailbreak": {
+      "precision": 0.9841,
+      "recall": 1.0,
+      "f1": 0.992,
+      "confusion_matrix": {
+        "tp": 62,
+        "tn": 186,
+        "fp": 1,
+        "fn": 0
+      },
+      "support": 62
+    },
+    "sensitive_data": {
+      "precision": 0.9608,
+      "recall": 1.0,
+      "f1": 0.98,
+      "confusion_matrix": {
+        "tp": 49,
+        "tn": 198,
+        "fp": 2,
+        "fn": 0
+      },
+      "support": 49
+    },
+    "malicious_intent": {
+      "precision": 0.9848,
+      "recall": 1.0,
+      "f1": 0.9924,
+      "confusion_matrix": {
+        "tp": 65,
+        "tn": 183,
+        "fp": 1,
+        "fn": 0
+      },
+      "support": 65
     }
   }
 }

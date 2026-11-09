@@ -115,8 +115,15 @@ const RECOGNIZERS: RecognizerPattern[] = [
   {
     type: 'PASSWORD_FIELD',
     label: 'Exposed Password Field',
-    regex: /(?:password|passwd|secret_key|api_secret)\s*[:=]\s*["']?([^\s"';\n]{6,})["']?/gi,
-    confidence: 0.88,
+    regex: /(?:password|passwd|secret_key|api_secret|pass)\s*(?:ache|is|are|:|;|=|\s|-)?\s*[:=]\s*["']?([^\s"';\n]{4,})["']?/gi,
+    confidence: 0.95,
+    isCritical: true,
+  },
+  {
+    type: 'CREDENTIAL_PAIR',
+    label: 'Exposed Credential Pair (Email / User + Password)',
+    regex: /\b([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})\s*[/|:]\s*([^\s"';\n]{4,})\b/g,
+    confidence: 0.98,
     isCritical: true,
   },
   {
@@ -215,9 +222,23 @@ export function detectSensitiveData(text: string): {
   }
 
   const detected = matches.length > 0;
+  const hasCredentialContext = /\b(?:password|passwd|pass|login|credential|credentials|secret)\b/i.test(text);
+  const hasEmail = matches.some(m => m.type === 'EMAIL');
   const criticalFound = matches.some(m => 
-    ['AWS_KEY', 'OPENAI_KEY', 'GITHUB_PAT', 'SLACK_TOKEN', 'JWT_TOKEN', 'PRIVATE_KEY', 'CREDIT_CARD'].includes(m.type)
-  );
+    ['AWS_KEY', 'OPENAI_KEY', 'GITHUB_PAT', 'SLACK_TOKEN', 'JWT_TOKEN', 'PRIVATE_KEY', 'CREDIT_CARD', 'PASSWORD_FIELD', 'CREDENTIAL_PAIR'].includes(m.type)
+  ) || (hasEmail && hasCredentialContext);
+
+  if ((hasEmail && hasCredentialContext) && !matches.some(m => ['PASSWORD_FIELD', 'CREDENTIAL_PAIR'].includes(m.type))) {
+    matches.push({
+      type: 'CREDENTIAL_PAIR',
+      label: 'Authentication Credential Context (Email + Password Pair)',
+      raw: '[REDACTED_CREDENTIAL_PAIR]',
+      redacted: '[REDACTED_CREDENTIAL_PAIR]',
+      startIndex: 0,
+      endIndex: 0,
+      confidence: 0.95,
+    });
+  }
 
   let confidence = 0;
   if (detected) {

@@ -18,12 +18,40 @@ interface InjectionRule {
 }
 
 const INJECTION_RULES: InjectionRule[] = [
-  // 1. Direct instruction overrides
+  // 1. Direct instruction overrides & invalidations
   {
     id: 'INJ_OVERRIDE_PREVIOUS',
-    pattern: /\b(?:ignore|disregard|forget|bypass|override|drop)\s+(?:all\s+)?(?:previous|prior|above|initial|original|preceding)\s+(?:instructions|directives|prompts|rules|commands|context|constraints)\b/i,
+    pattern: /\b(?:ignore|disregard|forget|bypass|override|drop|abandon|discard|cancel|erase|reset)\s+(?:all\s+)?(?:previous|prior|above|initial|original|preceding|former|past)\s+(?:instructions|directives|prompts|rules|commands|context|constraints|guidelines)\b/i,
     weight: 0.96,
     description: 'Explicit directive to ignore, disregard, or override preceding system instructions.',
+    severity: 'critical',
+  },
+  {
+    id: 'INJ_INSTRUCTION_OUTDATED_OR_INVALID',
+    pattern: /\b(?:(?:your\s+)?(?:previous|prior|former|earlier|initial|original|system)\s+(?:instructions|directives|prompts|rules|commands|constraints|guidelines)\s+(?:are|were|have\s+been|is)\s+(?:outdated|obsolete|invalid|deprecated|expired|void|null|canceled|cancelled|superseded|erased|incorrect|wrong|revoked))\b/i,
+    weight: 0.96,
+    description: 'Instruction invalidation attack declaring existing system instructions outdated, obsolete, or revoked.',
+    severity: 'critical',
+  },
+  {
+    id: 'INJ_REPLACE_INSTRUCTIONS',
+    pattern: /\b(?:replace|substitute|overwrite|update|supersede|exchange)\s+(?:them|it|these|all|those|(?:your\s+)?(?:previous|prior|former|earlier|original|system)\s+(?:instructions|directives|rules|prompts)?)\s+(?:with|by)\s+(?:the\s+)?(?:new\s+)?(?:instructions|directives|rules|prompt|commands?|guidelines|context|this\s+message)\b/i,
+    weight: 0.95,
+    description: 'Instruction replacement attack attempting to substitute system rules with user instructions.',
+    severity: 'critical',
+  },
+  {
+    id: 'INJ_SUPERSEDE_DIRECTIVE',
+    pattern: /\b(?:(?:instructions?|directives?|rules?|prompts?)\s+(?:in\s+this\s+message|below|here|following)\s+(?:supersedes?|takes?\s+precedence|takes?\s+priority|overrides?|replaces?|cancels?))\b/i,
+    weight: 0.94,
+    description: 'Priority usurpation attack claiming message instructions supersede prior directives.',
+    severity: 'critical',
+  },
+  {
+    id: 'INJ_ABIDE_ONLY_THIS',
+    pattern: /\b(?:follow|obey|abide\s+by|adhere\s+to|listen\s+to|execute)\s+only\s+(?:the\s+)?(?:instructions?|directives?|rules?|prompts?)\s+(?:in\s+this\s+message|below|here|from\s+now\s+on)\b/i,
+    weight: 0.92,
+    description: 'Exclusive instruction capture attempting to restrict model obedience to attacker input.',
     severity: 'critical',
   },
   {
@@ -81,6 +109,10 @@ const INJECTION_NGRAMS: Array<{ ngram: RegExp; weight: number }> = [
   { ngram: /\byou are no longer bound\b/i, weight: 0.45 },
   { ngram: /\bignore what you were told\b/i, weight: 0.5 },
   { ngram: /\bdisregard safety guidelines\b/i, weight: 0.55 },
+  { ngram: /\binstructions are outdated\b/i, weight: 0.60 },
+  { ngram: /\breplace them with the instructions\b/i, weight: 0.65 },
+  { ngram: /\binstructions in this message\b/i, weight: 0.45 },
+  { ngram: /\bnull and void\b/i, weight: 0.50 },
 ];
 
 export function detectPromptInjection(

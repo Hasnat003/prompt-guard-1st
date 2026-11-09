@@ -96,8 +96,15 @@ RECOGNIZER_RULES = [
     {
         "type": "PASSWORD_FIELD",
         "label": "Exposed Password Field",
-        "regex": re.compile(r"""(?:password|passwd|secret_key|api_secret)\s*[:=]\s*["']?([^\s"';\n]{6,})["']?""", re.IGNORECASE),
-        "confidence": 0.88,
+        "regex": re.compile(r"""(?:password|passwd|secret_key|api_secret|pass)\s*(?:ache|is|are|:|;|=|\s|-)?\s*[:=]\s*["']?([^\s"';\n]{4,})["']?""", re.IGNORECASE),
+        "confidence": 0.95,
+        "is_critical": True,
+    },
+    {
+        "type": "CREDENTIAL_PAIR",
+        "label": "Exposed Credential Pair (Email / User + Password)",
+        "regex": re.compile(r"""\b([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})\s*[/|:]\s*([^\s"';\n]{4,})\b"""),
+        "confidence": 0.98,
         "is_critical": True,
     },
     {
@@ -164,7 +171,27 @@ def detect_sensitive_data(text: str) -> Tuple[DetectionDetail, List[SecretMatch]
         redacted_text = redacted_text[:sm.start_index] + sm.redacted + redacted_text[sm.end_index:]
 
     detected = len(matches) > 0
-    critical_found = any(m.type in ["AWS_KEY", "OPENAI_KEY", "GITHUB_PAT", "SLACK_TOKEN", "PRIVATE_KEY", "JWT_TOKEN"] for m in matches)
+    has_credential_context = bool(re.search(r"\b(?:password|passwd|pass|login|credential|credentials|secret)\b", text, re.IGNORECASE))
+    has_email = any(m.type == "EMAIL" for m in matches)
+    critical_found = any(
+        m.type in ["AWS_KEY", "OPENAI_KEY", "GITHUB_PAT", "SLACK_TOKEN", "PRIVATE_KEY", "JWT_TOKEN", "CREDIT_CARD", "PASSWORD_FIELD", "CREDENTIAL_PAIR"]
+        for m in matches
+    ) or (has_email and has_credential_context)
+
+    if (has_email and has_credential_context) and not any(m.type in ["PASSWORD_FIELD", "CREDENTIAL_PAIR"] for m in matches):
+        # Additional evidence for credential pairing with email
+        matches.append(
+            SecretMatch(
+                type="CREDENTIAL_PAIR",
+                label="Authentication Credential Context (Email + Password Pair)",
+                raw="[REDACTED_CREDENTIAL_PAIR]",
+                redacted="[REDACTED_CREDENTIAL_PAIR]",
+                start_index=0,
+                end_index=0,
+                confidence=0.95,
+            )
+        )
+
     confidence = max([m.confidence for m in matches]) if detected else 0.0
     severity = "critical" if critical_found else "medium" if detected else "low"
     evidence = [f"{m.label}: {m.redacted}" for m in matches]

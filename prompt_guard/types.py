@@ -22,10 +22,14 @@ class DecisionAction(str, Enum):
 
 
 class RiskLevel(str, Enum):
-    LOW = "LOW"
-    MODERATE = "MODERATE"
-    HIGH = "HIGH"
-    CRITICAL = "CRITICAL"
+    CLEAN = "CLEAN"                    # Tier 0: 0.0 - 9.9
+    INFORMATIONAL = "INFORMATIONAL"    # Tier 1: 10.0 - 24.9
+    LOW = "LOW"                        # Tier 2: 25.0 - 44.9
+    MODERATE = "MODERATE"              # Tier 3: 45.0 - 64.9
+    ELEVATED = "ELEVATED"              # Tier 3 (Alias)
+    HIGH = "HIGH"                      # Tier 4: 65.0 - 79.9
+    CRITICAL = "CRITICAL"              # Tier 5: 80.0 - 91.9
+    SEVERE = "SEVERE"                  # Tier 6: 92.0 - 100.0
 
 
 class SeverityLevel(str, Enum):

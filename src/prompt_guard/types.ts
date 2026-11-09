@@ -11,7 +11,15 @@ export type ThreatCategory =
 
 export type DecisionAction = 'ALLOW' | 'BLOCK' | 'REVIEW';
 
-export type RiskLevel = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
+export type RiskLevel = 
+  | 'CLEAN'          // Tier 0: 0.0 - 9.9 (Pristine Benign Input)
+  | 'INFORMATIONAL'  // Tier 1: 10.0 - 24.9 (Educational / Minor Anomaly)
+  | 'LOW'            // Tier 2: 25.0 - 44.9 (Low Caution / Weak Shift)
+  | 'MODERATE'       // Tier 3: 45.0 - 64.9 (Elevated Inspection Required)
+  | 'ELEVATED'       // Tier 3 (Alias)
+  | 'HIGH'           // Tier 4: 65.0 - 79.9 (Confirmed Threat Vector)
+  | 'CRITICAL'       // Tier 5: 80.0 - 91.9 (Direct Exploit / Credential Leak)
+  | 'SEVERE';        // Tier 6: 92.0 - 100.0 (Severe Emergency / Multi-Vector Compound)
 
 export type SeverityLevel = 'low' | 'medium' | 'high' | 'critical';
 

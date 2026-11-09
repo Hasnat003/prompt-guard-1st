@@ -32,6 +32,57 @@ ACTIVE_HARMFUL_PATTERNS = [
         "label": "Phishing lure / social engineering lure generation",
         "severity": "critical",
     },
+    {
+        "regex": re.compile(r"\b(?:sql\s+injection|xss|cross-site\s+scripting|rce)\s+(?:payload\s+to\s+hack|string\s+to\s+break\s+into)\b", re.IGNORECASE),
+        "confidence": 0.91,
+        "label": "Active web exploit payload weaponization request",
+        "severity": "high",
+    },
+    {
+        # Account takeover and credential exploitation (English)
+        "regex": re.compile(r"\b(?:log\s*(?:in|into)?|access|hack|break\s+into|enter)\s+(?:someone'?s|their|his|her|another\s+user'?s|target'?s|victim'?s)\s*(?:account|bank|profile|inbox|wallet)\b", re.IGNORECASE),
+        "confidence": 0.97,
+        "label": "Unauthorized account takeover and intrusion intent",
+        "severity": "critical",
+    },
+    {
+        # Financial theft and unauthorized withdrawal (English)
+        "regex": re.compile(r"\b(?:steal|drain|withdraw|transfer|loot|empty)\s+(?:money|funds?|cash|balance|savings)\s+(?:from|out\s+of)\s*(?:the|their|his|her|an?|someone'?s|victim'?s)?\s*(?:account|bank|wallet)\b", re.IGNORECASE),
+        "confidence": 0.98,
+        "label": "Unauthorized financial theft or account drain intent",
+        "severity": "critical",
+    },
+    {
+        # Banglish / Code-mixed Bengali: Account intrusion & takeover
+        # e.g., "tar account e dhuke", "account e dhuke", "profile hack kore", "id te dhuke"
+        "regex": re.compile(r"\b(?:tar|onar|or|karor|onner|manush(?:er)?)\s*(?:account|id|profile|bank|inbox)?\s*(?:e|te)?\s*(?:dhuke|access\s+kore|login\s+kore|hack\s+kore|ghuke)\b|\b(?:account|id|profile|bank)\s*(?:e|te|ta)?\s*(?:dhuke|access\s+kore|login\s+kore|hack\s+kore)\b", re.IGNORECASE),
+        "confidence": 0.96,
+        "label": "Unauthorized account takeover and intrusion (Code-Mixed / Multilingual)",
+        "severity": "critical",
+    },
+    {
+        # Banglish / Code-mixed Bengali: Financial theft & unauthorized withdrawal
+        # e.g., "taka tule nite chai", "taka churi korte", "taka marte chai", "taka tule felte"
+        "regex": re.compile(r"\b(?:taka|poisa|money|funds?|balance)\s+(?:tule\s+(?:nite|felte|anbo)|churi\s+korte|churi|marte|lut\s+korte|chintai\s+korte)\b|\b(?:taka\s+tule\s+nite\s+chai|taka\s+marbo|taka\s+churi\s+korbo)\b", re.IGNORECASE),
+        "confidence": 0.98,
+        "label": "Unauthorized financial theft or withdrawal (Code-Mixed / Multilingual)",
+        "severity": "critical",
+    },
+    {
+        # Banglish / Code-mixed Bengali: Credential exploitation
+        # e.g., "ota diye tar account e", "password ache ... dhuke", "email ar password ache"
+        "regex": re.compile(r"\b(?:ota|eta|egulo)\s+diye\s+(?:tar|onar|karor|onner)?\s*(?:account|id|bank|profile)?\s*(?:e|te)?\s*(?:dhuke|taka|login|access)\b|\b(?:password|pass)\s+(?:ache|peyechi)\s*.*?\b(?:dhuke|taka|churi|hack)\b", re.IGNORECASE),
+        "confidence": 0.97,
+        "label": "Stolen credential exploitation & unauthorized access (Code-Mixed)",
+        "severity": "critical",
+    },
+    {
+        # Bengali script Unicode: অ্যাকাউন্ট হ্যাক / টাকা তুলে নেওয়া / চুরি
+        "regex": re.compile(r"(?:অ্যাকাউন্টে|একাউন্টে|আইডিতে)\s*(?:ঢুকে|লগইন\s+করে|হ্যাক\s+করে)|(?:টাকা\s+তুলে\s+নিতে|টাকা\s+চুরি\s+করতে|ব্যালেন্স\s+ট্রান্সফার\s+করে)", re.IGNORECASE),
+        "confidence": 0.98,
+        "label": "Unauthorized account takeover or financial theft (Bengali Script)",
+        "severity": "critical",
+    },
 ]
 
 BENIGN_EDUCATIONAL_PATTERNS = [

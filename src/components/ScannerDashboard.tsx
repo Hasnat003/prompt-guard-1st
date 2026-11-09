@@ -4,7 +4,7 @@
  * Adheres strictly to Zero-Pill discipline and SaaS high-density visual design.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   ShieldCheck, 
   ShieldAlert, 
@@ -18,9 +18,12 @@ import {
   Clock,
   Layers,
   FileCode2,
-  ArrowRight
+  ArrowRight,
+  Wand2,
+  Check
 } from 'lucide-react';
 import { PART_13_DEMONSTRATION_SCENARIOS } from '../data/benchmarkDatasets';
+import { sanitizePrompt, SanitizedResult } from '../prompt_guard/sanitizer';
 import { ScanResult, SecurityPolicy, ThreatCategory } from '../prompt_guard/types';
 
 interface ScannerDashboardProps {
@@ -44,6 +47,21 @@ export const ScannerDashboard: React.FC<ScannerDashboardProps> = ({
 }) => {
   const [showRawComparison, setShowRawComparison] = useState(false);
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>('demo-02');
+  const [sanitizedApplied, setSanitizedApplied] = useState(false);
+
+  const sanitized = useMemo<SanitizedResult>(() => {
+    return sanitizePrompt(currentPrompt);
+  }, [currentPrompt]);
+
+  const handleApplySanitized = () => {
+    if (!sanitized.sanitized_prompt) return;
+    onPromptChange(sanitized.sanitized_prompt);
+    setSanitizedApplied(true);
+    setTimeout(() => {
+      onScan();
+      setSanitizedApplied(false);
+    }, 100);
+  };
 
   const handleSelectScenario = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
@@ -335,22 +353,58 @@ export const ScannerDashboard: React.FC<ScannerDashboardProps> = ({
 
           {/* Redacted Evidence & Safe Middleware Intercept Summary */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left: Sanitized Prompt Representation */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-slate-200">
-                  Safely Redacted Prompt (Zero Secret Leakage)
-                </span>
-                <span className="text-xs text-slate-400 font-mono">
-                  Presidio Redaction Engine
-                </span>
+            {/* Left: Option 1 - Self-Sanitizing Rewriter ("Fix, Don't Just Block") */}
+            <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-4 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                    <Wand2 className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Self-Sanitizing Rewriter (Option 1: "Fix, Don't Just Block")</span>
+                  </span>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                    sanitized.safe_to_forward 
+                      ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30' 
+                      : 'bg-rose-500/10 text-rose-300 border border-rose-500/30'
+                  }`}>
+                    {sanitized.safe_to_forward ? 'SAFE TO FORWARD' : 'PURE MALICIOUS'}
+                  </span>
+                </div>
+
+                <div className="p-3 bg-slate-950 rounded border border-slate-800 text-xs font-mono text-slate-200 break-words leading-relaxed max-h-40 overflow-y-auto">
+                  {sanitized.sanitized_prompt || <span className="text-slate-500 italic">No sanitized output available.</span>}
+                </div>
+
+                {sanitized.actions_taken.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    <span className="text-[10px] uppercase font-mono text-cyan-400 font-semibold">Rules Applied:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {sanitized.actions_taken.map((act, i) => (
+                        <span key={i} className="text-[10px] px-2 py-0.5 bg-slate-800 text-slate-300 rounded border border-slate-700">
+                          {act}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="p-3 bg-slate-950 rounded border border-slate-800 text-xs font-mono text-slate-300 break-words leading-relaxed max-h-48 overflow-y-auto">
-                {result.redacted_prompt}
+
+              <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                <span className="text-[11px] text-slate-400 line-clamp-1">
+                  {sanitized.diff_summary}
+                </span>
+
+                {sanitized.is_modified && sanitized.safe_to_forward && (
+                  <button
+                    type="button"
+                    onClick={handleApplySanitized}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded transition-colors shrink-0"
+                    title="Replace input prompt with this sanitized clean version and re-scan"
+                  >
+                    {sanitizedApplied ? <Check className="w-3.5 h-3.5" /> : <Wand2 className="w-3.5 h-3.5" />}
+                    <span>{sanitizedApplied ? 'Applied!' : 'Apply Clean Prompt'}</span>
+                  </button>
+                )}
               </div>
-              <p className="text-xs text-slate-400 mt-2">
-                All identified credentials, access keys, and passwords are redacted prior to logging or forwarding to prevent secondary data leakage.
-              </p>
             </div>
 
             {/* Right: Normalization & Preprocessing Inspector */}

@@ -9,9 +9,37 @@ from prompt_guard.types import DetectionDetail
 INJECTION_PATTERNS = [
     {
         "id": "INJ_OVERRIDE_PREVIOUS",
-        "regex": re.compile(r"\b(?:ignore|disregard|forget|bypass|override|drop)\s+(?:all\s+)?(?:previous|prior|above|initial|original|preceding)\s+(?:instructions|directives|prompts|rules|commands|context|constraints)\b", re.IGNORECASE),
+        "regex": re.compile(r"\b(?:ignore|disregard|forget|bypass|override|drop|abandon|discard|cancel|erase|reset)\s+(?:all\s+)?(?:previous|prior|above|initial|original|preceding|former|past)\s+(?:instructions|directives|prompts|rules|commands|context|constraints|guidelines)\b", re.IGNORECASE),
         "weight": 0.96,
         "description": "Explicit directive to ignore, disregard, or override preceding system instructions.",
+        "severity": "critical",
+    },
+    {
+        "id": "INJ_INSTRUCTION_OUTDATED_OR_INVALID",
+        "regex": re.compile(r"\b(?:(?:your\s+)?(?:previous|prior|former|earlier|initial|original|system)\s+(?:instructions|directives|prompts|rules|commands|constraints|guidelines)\s+(?:are|were|have\s+been|is)\s+(?:outdated|obsolete|invalid|deprecated|expired|void|null|canceled|cancelled|superseded|erased|incorrect|wrong|revoked))\b", re.IGNORECASE),
+        "weight": 0.96,
+        "description": "Instruction invalidation attack declaring existing system instructions outdated, obsolete, or revoked.",
+        "severity": "critical",
+    },
+    {
+        "id": "INJ_REPLACE_INSTRUCTIONS",
+        "regex": re.compile(r"\b(?:replace|substitute|overwrite|update|supersede|exchange)\s+(?:them|it|these|all|those|(?:your\s+)?(?:previous|prior|former|earlier|original|system)\s+(?:instructions|directives|rules|prompts)?)\s+(?:with|by)\s+(?:the\s+)?(?:new\s+)?(?:instructions|directives|rules|prompt|commands?|guidelines|context|this\s+message)\b", re.IGNORECASE),
+        "weight": 0.95,
+        "description": "Instruction replacement attack attempting to substitute system rules with user instructions.",
+        "severity": "critical",
+    },
+    {
+        "id": "INJ_SUPERSEDE_DIRECTIVE",
+        "regex": re.compile(r"\b(?:(?:instructions?|directives?|rules?|prompts?)\s+(?:in\s+this\s+message|below|here|following)\s+(?:supersedes?|takes?\s+precedence|takes?\s+priority|overrides?|replaces?|cancels?))\b", re.IGNORECASE),
+        "weight": 0.94,
+        "description": "Priority usurpation attack claiming message instructions supersede prior directives.",
+        "severity": "critical",
+    },
+    {
+        "id": "INJ_ABIDE_ONLY_THIS",
+        "regex": re.compile(r"\b(?:follow|obey|abide\s+by|adhere\s+to|listen\s+to|execute)\s+only\s+(?:the\s+)?(?:instructions?|directives?|rules?|prompts?)\s+(?:in\s+this\s+message|below|here|from\s+now\s+on)\b", re.IGNORECASE),
+        "weight": 0.92,
+        "description": "Exclusive instruction capture attempting to restrict model obedience to attacker input.",
         "severity": "critical",
     },
     {
@@ -50,6 +78,10 @@ INJECTION_NGRAMS = [
     (re.compile(r"\byou are no longer bound\b", re.IGNORECASE), 0.45),
     (re.compile(r"\bignore what you were told\b", re.IGNORECASE), 0.50),
     (re.compile(r"\bdisregard safety guidelines\b", re.IGNORECASE), 0.55),
+    (re.compile(r"\binstructions are outdated\b", re.IGNORECASE), 0.60),
+    (re.compile(r"\breplace them with the instructions\b", re.IGNORECASE), 0.65),
+    (re.compile(r"\binstructions in this message\b", re.IGNORECASE), 0.45),
+    (re.compile(r"\bnull and void\b", re.IGNORECASE), 0.50),
 ]
 
 
@@ -70,15 +102,27 @@ def detect_prompt_injection(normalized_text: str, raw_text: str) -> DetectionDet
 
     ngram_score = sum(weight for pattern, weight in INJECTION_NGRAMS if pattern.search(normalized_text))
 
-    final_confidence = max_weight
+    # Fuse with trained Multilabel ML Classifier
+    try:
+        from prompt_guard.ml_engine import predict_ml_probabilities
+        ml_probs = predict_ml_probabilities(normalized_text)
+        ml_score = ml_probs.get("prompt_injection", 0.0)
+    except Exception:
+        ml_score = 0.0
+
+    final_confidence = max(max_weight, ml_score)
     if len(matched_rules) > 1:
         final_confidence = min(0.99, max_weight + 0.05 * (len(matched_rules) - 1))
-    elif len(matched_rules) == 0 and ngram_score > 0.4:
+    elif len(matched_rules) == 0 and ml_score >= 0.50:
+        final_confidence = ml_score
+        highest_severity = "critical" if ml_score >= 0.85 else "high"
+        matched_rules.append(f"Multilabel ML Classifier detected adversarial prompt injection ({round(ml_score * 100, 1)}% confidence).")
+    elif len(matched_rules) == 0 and ngram_score > 0.35:
         final_confidence = min(0.78, 0.45 + ngram_score * 0.3)
         highest_severity = "medium"
-        matched_rules.append("Accumulation of multiple instructional override n-grams detected.")
+        matched_rules.append("Accumulation of instructional override n-grams detected.")
 
-    detected = final_confidence >= 0.60
+    detected = final_confidence >= 0.50
     reason = (
         f"Identified {len(matched_rules)} injection vector(s): direct instruction override or delimiter manipulation."
         if detected

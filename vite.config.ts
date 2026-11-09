@@ -41,6 +41,70 @@ function promptGuardPythonPlugin(): Plugin {
         }
       });
 
+      server.middlewares.use('/api/py-sanitize', (req, res) => {
+        if (req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', () => {
+            try {
+              const data = JSON.parse(body || '{}');
+              const prompt = data.prompt || '';
+              execFile('python3', ['scripts/sanitize_api.py', prompt], { maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
+                if (err) {
+                  res.statusCode = 500;
+                  res.setHeader('Content-Type', 'application/json');
+                  res.end(JSON.stringify({ error: err.message, stderr }));
+                  return;
+                }
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(stdout);
+              });
+            } catch (parseErr: any) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: parseErr.message }));
+            }
+          });
+        } else {
+          res.statusCode = 405;
+          res.end('Method Not Allowed');
+        }
+      });
+
+      server.middlewares.use('/api/py-canary-inspect', (req, res) => {
+        if (req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', () => {
+            try {
+              const data = JSON.parse(body || '{}');
+              const outputText = data.output || '';
+              const canary = data.canary || '';
+              const sysPrompt = data.systemPrompt || '';
+              execFile('python3', ['scripts/canary_api.py', outputText, canary, sysPrompt], { maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
+                if (err) {
+                  res.statusCode = 500;
+                  res.setHeader('Content-Type', 'application/json');
+                  res.end(JSON.stringify({ error: err.message, stderr }));
+                  return;
+                }
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(stdout);
+              });
+            } catch (parseErr: any) {
+              res.statusCode = 400;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: parseErr.message }));
+            }
+          });
+        } else {
+          res.statusCode = 405;
+          res.end('Method Not Allowed');
+        }
+      });
+
       server.middlewares.use('/api/py-test', (req, res) => {
         execFile('python3', ['-m', 'unittest', 'discover', 'tests'], (err, stdout, stderr) => {
           res.setHeader('Content-Type', 'application/json');

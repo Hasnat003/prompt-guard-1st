@@ -254,13 +254,24 @@ def run_training_and_evaluation():
         with open(os.path.join(OUTPUT_RESULTS_DIR, "evaluation_results.json"), "w") as jf:
             json.dump(eval_payload, jf, indent=2)
             
-        # Export portable model bundle
+        # Export portable model bundle with weights and idf
+        compact_weights = []
+        for label_idx in range(4):
+            w = weights[label_idx]
+            compact_w = {k: round(v, 4) for k, v in w.items() if abs(v) >= 0.01}
+            compact_weights.append(compact_w)
+
+        compact_idf = {k: round(v, 4) for k, v in idf.items() if any(k in compact_weights[i] for i in range(4))}
+
         model_export = {
             "model_type": "MultiOutputClassifier(LogisticRegression) + TfidfVectorizer",
             "labels": LABEL_COLS,
             "vocabulary_size": len(vocab),
-            "biases": biases,
+            "biases": [round(b, 4) for b in biases],
+            "idf": compact_idf,
+            "weights": compact_weights,
             "macro_f1": round(macro_f1, 4),
+            "micro_f1": round(micro_f1, 4),
             "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
         }
         with open(os.path.join(OUTPUT_MODEL_DIR, "promptguard_model.json"), "w") as mf:

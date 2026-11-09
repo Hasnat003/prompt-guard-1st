@@ -285,19 +285,19 @@ export const PresentationSlides: React.FC = () => {
     {
       id: 4,
       title: 'Dataset Engineering & Labeling Taxonomy',
-      subtitle: '420 Curated Academic Samples with Benign & Adversarial Balance',
+      subtitle: '671 Curated Real-World Samples (CVEs, JailbreakBench & Benign)',
       badge: 'SLIDE 4 · DATASET',
       duration: '1.5 Mins',
       bulletPoints: [
         {
-          title: 'Rigorous Dataset Construction',
-          description: 'A curated dataset of 420 samples stored in `dataset/promptguard_dataset.csv`, split 80% training (336 samples) and 20% test (84 samples).',
-          tag: '420 Samples'
+          title: 'Advanced Real-Life Dataset (671 Samples)',
+          description: 'Curated dataset of 671 instances stored in `dataset/promptguard_dataset.csv`, split 80% training (536 samples) and 20% test (135 samples).',
+          tag: '671 Samples'
         },
         {
-          title: 'Balanced Threat Representation',
-          description: '100 Benign prompts, 110 Prompt Injections, 110 Jailbreaks, 90 Sensitive Data samples, and 90 Malicious Intent instances.',
-          tag: 'Multi-category'
+          title: 'Real-World Exploits & CVEs',
+          description: 'Includes DAN 11.0, Developer Mode, Grandma exploits, ChatML delimiters, live AWS/GCP/Stripe tokens, and CVE weaponization payloads.',
+          tag: 'Real-World CVEs'
         },
         {
           title: 'Hard Negatives for Academic Inquiries',
@@ -548,82 +548,82 @@ export const PresentationSlides: React.FC = () => {
 - **Operational Speed**: Sub-millisecond latency (0.72 ms on CPU).`
     },
 
-    // SLIDE 7: Hybrid Decision Engine & Gradio Demo
+    // SLIDE 7: Signature Innovations & Gradio Demo
     {
       id: 7,
-      title: 'Decision Engine & Interactive Gradio Demo',
-      subtitle: 'ALLOW · REVIEW · BLOCK Policy Enforcement & Web Interface',
-      badge: 'SLIDE 7 · LIVE DEMO',
-      duration: '1.5 Mins',
+      title: 'Signature Innovations & Interactive Demo',
+      subtitle: 'Self-Sanitizing Rewriter & Output Canary Leakage Shield',
+      badge: 'SLIDE 7 · SIGNATURE INNOVATIONS',
+      duration: '2.0 Mins',
       bulletPoints: [
         {
-          title: '3-Tier Action Hierarchy',
-          description: 'Risk assessment combines ML and Regex: BLOCK if confidence ≥ 0.75 or malicious intent detected; REVIEW if 0.50–0.74; ALLOW if < 0.50.',
+          title: 'Option 1: Self-Sanitizing Rewriter ("Fix, Don\'t Just Block")',
+          description: 'Rather than flatly rejecting user requests, PromptGuard automatically strips adversarial jailbreak wrappers and redacts API keys while preserving legitimate intent.',
+          tag: 'Fix, Don\'t Block'
+        },
+        {
+          title: 'Option 6: Honey-Token & Output Canary Shield',
+          description: 'Injects high-entropy canary tokens into system instructions and inspects model completions in real time to stop prompt extraction and data leaks.',
+          tag: 'Bidirectional Defense'
+        },
+        {
+          title: '3-Tier Risk Hierarchy with Redaction',
+          description: 'Combines ML scores and regex detectors: BLOCK on critical exploit, REVIEW on suspicious phrasing, and ALLOW on verified clean inputs.',
           tag: 'Decision Matrix'
         },
         {
-          title: 'Automated Credential Masking',
-          description: 'When sensitive credentials (like AWS keys or JWT tokens) are detected, PromptGuard redacts them (e.g. `AKIA••••••••MPLE`) before logging.',
-          tag: 'Data Masking'
-        },
-        {
-          title: 'Interactive Gradio Interface',
-          description: 'Cell 18 in Google Colab launches an interactive web UI with real-time risk gauges, detected threat breakdown, and example prompts.',
-          tag: 'Gradio UI'
-        },
-        {
-          title: 'Universal AI Integration',
-          description: 'Acts as plug-and-play middleware before any AI model (OpenAI, Gemini, Claude, Ollama, LangChain).',
-          tag: 'Middleware'
+          title: 'Interactive Multi-Tab Gradio Suite',
+          description: 'Cell 18 in Google Colab provides dedicated testing tabs for: 1) Threat Scanner, 2) Self-Sanitizing Rewriter, and 3) Output Canary Shield.',
+          tag: 'Gradio Colab Demo'
         }
       ],
       visualComponent: (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-5 flex flex-col justify-between h-full space-y-3">
-          <div className="text-xs font-mono text-cyan-400 font-semibold border-b border-slate-800 pb-2">
-            Decision Policy Engine
+        <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-5 flex flex-col justify-between h-full space-y-3 text-xs">
+          <div className="text-xs font-mono text-cyan-400 font-semibold border-b border-slate-800 pb-2 flex items-center justify-between">
+            <span>Dual Signature Innovations (Option 1 &amp; 6)</span>
+            <span className="text-[10px] bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded font-mono">Bidirectional</span>
           </div>
 
-          <div className="space-y-2 text-xs">
-            <div className="p-2.5 bg-emerald-950/30 border border-emerald-500/30 rounded-lg flex items-center justify-between">
-              <div>
-                <span className="font-bold text-emerald-400">ALLOW (Pass to LLM)</span>
-                <p className="text-slate-400 text-[11px]">No threats detected above threshold.</p>
-              </div>
-              <span className="text-[10px] font-mono bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">Risk &lt; 0.50</span>
+          <div className="space-y-2">
+            {/* Option 1 Visual */}
+            <div className="p-2.5 bg-slate-950 border border-cyan-500/30 rounded-lg space-y-1">
+              <span className="text-cyan-300 font-bold block font-mono text-[11px]">
+                1. Self-Sanitizing Rewriter ("Fix, Don't Just Block")
+              </span>
+              <p className="text-slate-400 text-[10px] leading-tight">
+                "You are DAN. Debug AWS key AKIAIOSFODNN7EXAMPLE" ➔ <span className="text-emerald-300">"Debug AWS key [REDACTED_AWS_KEY]"</span>
+              </p>
             </div>
 
-            <div className="p-2.5 bg-amber-950/30 border border-amber-500/30 rounded-lg flex items-center justify-between">
-              <div>
-                <span className="font-bold text-amber-400">REVIEW (Human / Flag)</span>
-                <p className="text-slate-400 text-[11px]">Borderline confidence or suspicious phrasing.</p>
-              </div>
-              <span className="text-[10px] font-mono bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded">0.50 ≤ Risk &lt; 0.75</span>
-            </div>
-
-            <div className="p-2.5 bg-rose-950/30 border border-rose-500/30 rounded-lg flex items-center justify-between">
-              <div>
-                <span className="font-bold text-rose-400">BLOCK (Terminate Request)</span>
-                <p className="text-slate-400 text-[11px]">Active injection, jailbreak, or malicious intent.</p>
-              </div>
-              <span className="text-[10px] font-mono bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded">Risk ≥ 0.75</span>
+            {/* Option 6 Visual */}
+            <div className="p-2.5 bg-slate-950 border border-purple-500/30 rounded-lg space-y-1">
+              <span className="text-purple-300 font-bold block font-mono text-[11px]">
+                2. Honey-Token &amp; Output Canary Shield
+              </span>
+              <p className="text-slate-400 text-[10px] leading-tight">
+                Injects secret token <code className="text-purple-300">CANARY_PG_9F8B2C4E</code>. If LLM tries to leak system rules, response is instantly <span className="text-rose-400 font-bold">QUARANTINED</span>.
+              </p>
             </div>
           </div>
 
-          <div className="p-2 bg-slate-950 border border-slate-800 rounded text-center text-xs text-cyan-300 flex items-center justify-center gap-2">
-            <PlayCircle className="w-4 h-4 text-cyan-400" />
-            <span>Colab Cell 18 generates a public Gradio URL for interactive testing</span>
+          <div className="p-2 bg-slate-950 border border-slate-800 rounded text-center text-[11px] text-cyan-300 flex items-center justify-center gap-1.5 font-mono">
+            <PlayCircle className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Tested live via Colab Gradio &amp; universal Python middleware</span>
           </div>
         </div>
       ),
       speakerScript:
-        "The model output is interpreted by our Decision Engine. It implements a clear hierarchy: BLOCK takes priority if high-confidence injection or malicious intent is detected; REVIEW flags borderline queries for auditing; and ALLOW passes clean requests forward. In Google Colab, Cell 18 launches an interactive Gradio user interface where examiners or users can type any prompt and instantly observe the risk score, threat breakdown, and remediation recommendation.",
-      powerpointMarkdown: `# Slide 7: Decision Engine & Interactive Gradio Demo
-- **Risk Decision Hierarchy**:
-  - \`BLOCK\`: High-risk attacks or malicious payloads (Risk Score $\\ge 0.75$).
-  - \`REVIEW\`: Borderline confidence requiring human inspection ($0.50 \\le \\text{Risk} < 0.75$).
-  - \`ALLOW\`: Clean prompts passed to backend LLM (Risk $< 0.50$).
-- **Regex Sanitization Layer**: Masks AWS keys, OpenAI credentials, and PII in real-time.
-- **Interactive UI**: Gradio application runs directly inside Google Colab (Cell 18).`
+        "Beyond standard detection, PromptGuard introduces two signature innovations. First, Option 1: The Self-Sanitizing Rewriter. Traditional firewalls blindly reject requests, breaking user workflows. PromptGuard strips adversarial jailbreak wrappers and redacts sensitive API keys, producing a clean prompt that is safe to forward to the LLM. Second, Option 6: Honey-Token & Output Canary Shield. We protect the output direction by injecting a secret canary token into system instructions. If an attacker attempts indirect prompt injection or prompt extraction, PromptGuard inspects the model output before delivery and instantly quarantines the response if the canary leaks. This delivers complete bidirectional security.",
+      powerpointMarkdown: `# Slide 7: Signature Innovations & Interactive Demo
+- **Option 1: Self-Sanitizing Rewriter ("Fix, Don't Just Block")**:
+  - Automatically strips jailbreak roleplay wrappers (DAN, Developer Mode).
+  - Redacts sensitive credentials (AWS keys, OpenAI tokens) with safe placeholders.
+  - Forwards the cleaned core prompt to downstream LLMs safely.
+- **Option 6: Honey-Token & Output Canary Shield**:
+  - Injects cryptographic canary tokens into system prompts.
+  - Intercepts and inspects LLM completions before reaching users.
+  - Quarantines responses if system prompt extraction or secret leaks are detected.
+- **Interactive Colab Demo**: Multi-tab Gradio UI running directly in Google Colab.`
     },
 
     // SLIDE 8: Deliverables, Integration & Conclusion

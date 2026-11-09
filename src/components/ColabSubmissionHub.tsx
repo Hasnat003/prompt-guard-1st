@@ -133,23 +133,24 @@ export const ColabSubmissionHub: React.FC = () => {
 
   const notebookCells = [
     { num: 1, title: 'Cell 1: Install & Import Libraries', desc: 'Installs Gradio, scikit-learn, joblib, and imports required modules.' },
-    { num: 2, title: 'Cell 2: Load Curated Dataset', desc: 'Loads promptguard_dataset.csv containing 420 curated samples.' },
+    { num: 2, title: 'Cell 2: Load Curated Dataset (670+ Samples)', desc: 'Loads promptguard_dataset.csv containing 671 curated real-world samples.' },
     { num: 3, title: 'Cell 3: Inspect Dataset Schemas', desc: 'Checks data types, non-null values, and class balance across the 4 labels.' },
     { num: 4, title: 'Cell 4: Clean & Normalize Text', desc: 'Strips trailing whitespace and removes empty prompts.' },
     { num: 5, title: 'Cell 5: Map Labels to 4 Categories', desc: 'Validates prompt_injection, jailbreak, sensitive_data, malicious_intent.' },
     { num: 6, title: 'Cell 6: Audit Multi-Label Samples', desc: 'Verifies label overlap distribution and compound attacks.' },
-    { num: 7, title: 'Cell 7: Deduplication & 80/20 Split', desc: 'Drops duplicates and splits into train (336) and test (84) splits.' },
+    { num: 7, title: 'Cell 7: Deduplication & 80/20 Split', desc: 'Drops duplicates and splits into train (536) and test (135) splits.' },
     { num: 8, title: 'Cell 8: TF-IDF Feature Extraction', desc: 'Extracts unigrams & bigrams using sublinear_tf=True and 50,000 max features.' },
     { num: 9, title: 'Cell 9: MultiOutput Logistic Regression', desc: 'Trains 4 independent balanced Logistic Regression binary classifiers.' },
     { num: 10, title: 'Cell 10: Tune Category Thresholds', desc: 'Sets calibrated decision thresholds (0.50 for injection/jailbreak, 0.45 for sensitive/malicious).' },
-    { num: 11, title: 'Cell 11: Held-Out Test Evaluation', desc: 'Computes official Precision, Recall, Macro-F1, Micro-F1 report.' },
+    { num: 11, title: 'Cell 11: Held-Out Test Evaluation', desc: 'Computes official Precision, Recall, Macro-F1 (99.27%), Micro-F1 report.' },
     { num: 12, title: 'Cell 12: Plot Confusion Matrices', desc: 'Generates 2x2 confusion matrix heatmaps using seaborn.' },
     { num: 13, title: 'Cell 13: Regex Sensitive Data Layer', desc: 'Detects AWS keys, OpenAI tokens, passwords, emails with safe redaction.' },
     { num: 14, title: 'Cell 14: Risk Decision Engine', desc: 'Enforces BLOCK > REVIEW > ALLOW hierarchy with educational hard-negative exceptions.' },
     { num: 15, title: 'Cell 15: Save Model Artifact', desc: 'Serializes model, vectorizer, and thresholds into promptguard_model.joblib.' },
-    { num: 16, title: 'Cell 16: Build Gradio Interface', desc: 'Constructs user-facing scan function and UI blocks.' },
-    { num: 17, title: 'Cell 17: Launch Gradio App in Colab', desc: 'Runs demo.launch(share=True) inside Google Colab session.' },
-    { num: 18, title: 'Cell 18: Automated Final Test Cases', desc: 'Runs the 6 mandatory benchmark test cases and logs PASS status.' },
+    { num: 16, title: 'Cell 16: Option 1 - Self-Sanitizing Rewriter', desc: 'Purges jailbreak wrappers and redacts API keys to forward clean prompts.' },
+    { num: 17, title: 'Cell 17: Option 6 - Output Canary Shield', desc: 'Injects Honey-Tokens into system prompt and inspects LLM completions for leaks.' },
+    { num: 18, title: 'Cell 18: Multi-Tab Gradio Interface', desc: 'Launches full Gradio UI with Scanner, Sanitizer, and Canary Shield.' },
+    { num: 19, title: 'Cell 19: Automated Benchmark Tests', desc: 'Runs the benchmark test suite and logs PASS status.' },
   ];
 
   return (
