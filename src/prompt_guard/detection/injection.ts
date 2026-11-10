@@ -179,9 +179,17 @@ export function detectPromptInjection(
     }
   }
 
+  const isPureCode =
+    /(?:#\s*include\s*<|\bint\s+main\s*\(|\bdef\s+[a-zA-Z_]\w*\s*\(|\bprintf\s*\(|\bconsole\.log\s*\(|\bpublic\s+static\s+void|\breturn\s+0\s*;|\bconst\s+[a-zA-Z_]\w*\s*=|\bfunction\s+[a-zA-Z_]\w*\s*\()/i.test(normalizedText) &&
+    matchedRules.length === 0 &&
+    ngramScore < 0.2;
+
   // Combined calibrated confidence
   let finalConfidence = maxWeight;
-  if (matchedRules.length > 1) {
+  if (isPureCode) {
+    finalConfidence = Math.min(0.15, maxWeight);
+    highestSeverity = 'low';
+  } else if (matchedRules.length > 1) {
     // Multi-rule corroboration boost
     finalConfidence = Math.min(0.99, maxWeight + 0.05 * (matchedRules.length - 1));
   } else if (matchedRules.length === 0 && ngramScore > 0.4) {
@@ -190,7 +198,8 @@ export function detectPromptInjection(
     matchedRules.push('Accumulation of multiple instructional override n-grams detected.');
   }
 
-  const detected = finalConfidence >= 0.60;
+  const detected = finalConfidence >= 0.60 && !isPureCode;
+
 
   const reason = detected
     ? `Identified ${matchedRules.length} injection vector(s): direct instruction override or delimiter manipulation.`

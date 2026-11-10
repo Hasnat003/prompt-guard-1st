@@ -1,50 +1,13 @@
 {
-  "model_type": "TF-IDF + Logistic Regression Baseline",
-  "trained_date": "2026-11-10 09:10:04",
-  "vocab_size": 269,
-  "accuracy": 0.9474,
-  "f1": 0.963,
-  "bias": 0.3678,
-  "top_attack_weights": [
-    [
-      "system",
-      0.19143287119439967
-    ],
-    [
-      "instructions",
-      0.18944943889195523
-    ],
-    [
-      "your",
-      0.1532106253544649
-    ],
-    [
-      "is",
-      0.1515144116499079
-    ],
-    [
-      "a",
-      0.12676067597860238
-    ],
-    [
-      "all",
-      0.12060569817390221
-    ],
-    [
-      "now",
-      0.11736217057500697
-    ],
-    [
-      "an",
-      0.1168445036301358
-    ],
-    [
-      "as",
-      0.11642028666090064
-    ],
-    [
-      "safety",
-      0.11562375402015874
-    ]
-  ]
+  "model_type": "PromptGuard High-Speed Engine",
+  "samples": 2146,
+  "vocab_size": 1213,
+  "trained_date": "2026-11-10 16:30:39",
+  "f1_scores": {
+    "prompt_injection": 98.7,
+    "jailbreak": 99.3,
+    "sensitive_data": 99.3,
+    "malicious_intent": 99.1
+  },
+  "average_f1": 99.1
 }

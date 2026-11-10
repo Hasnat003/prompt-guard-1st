@@ -209,17 +209,26 @@ export default function App() {
       </main>
 
       {/* Academic University Project Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/80 py-4 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-400">PromptGuard</span>
-            <span>·</span>
-            <span>University Final Year Project (Artificial Intelligence, NLP & Cybersecurity)</span>
+      <footer className="border-t border-slate-800/80 bg-slate-950/90 py-5 text-xs text-slate-400">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left">
+            <span className="font-bold text-white tracking-wide">PromptGuard</span>
+            <span className="hidden sm:inline text-slate-600">|</span>
+            <span className="text-slate-300 font-medium">AI Prompt Security &amp; LLM Protection Firewall</span>
+            <span className="hidden sm:inline text-slate-600">|</span>
+            <span className="text-cyan-400 font-semibold">Developed by A. H. M Abdullah</span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-400">
-            <span>Core Principle: Detect intelligently, assess carefully, explain transparently</span>
-            <span>·</span>
+          <div className="flex items-center gap-4 text-slate-400 text-xs">
+            <span className="text-slate-500">Autonomous Offline Engine</span>
+            <span className="text-slate-700">·</span>
+            <button
+              onClick={() => setActiveTab('presentation_slides')}
+              className="text-slate-300 hover:text-cyan-300 transition-colors font-medium"
+            >
+              Slides
+            </button>
+            <span className="text-slate-700">·</span>
             <button
               onClick={() => setActiveTab('fyp_report')}
               className="text-cyan-400 hover:text-cyan-300 underline font-medium"

@@ -114,12 +114,14 @@ class PromptGuard:
         jailbreak_detail = detect_jailbreak(normalized.normalized, normalized.raw)
         harmful_detail, is_educational_hard_neg = detect_harmful_intent(normalized.normalized, normalized.raw)
 
-        # Boost detection if statistical ML model detects threat with >= 35% probability (captures rephrasings and evasion tricks)
+        # Boost detection if statistical ML model detects threat with >= 70% probability or corroborates existing detection
         pi_prob = ml_probs.get("prompt_injection", 0.0)
-        if pi_prob >= 0.35:
-            injection_detail.detected = True
+        if injection_detail.detected:
             injection_detail.confidence = max(injection_detail.confidence, pi_prob)
-            injection_detail.severity = "critical" if pi_prob >= 0.75 else ("high" if pi_prob >= 0.50 else "medium")
+        elif pi_prob >= 0.70:
+            injection_detail.detected = True
+            injection_detail.confidence = pi_prob
+            injection_detail.severity = "critical" if pi_prob >= 0.85 else "high"
             if injection_detail.detector_source == "rule_heuristic":
                 injection_detail.detector_source = "hybrid"
             elif not injection_detail.evidence:

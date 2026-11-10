@@ -159,6 +159,45 @@ function promptGuardPythonPlugin(): Plugin {
           });
         });
       });
+
+      server.middlewares.use('/api/download-zip', (_req, res) => {
+        const zipFile = path.resolve(__dirname, 'public/PromptGuard_Codebase_Submission.zip');
+        if (!fs.existsSync(zipFile)) {
+          res.statusCode = 404;
+          res.end('File not found');
+          return;
+        }
+        const stat = fs.statSync(zipFile);
+        res.writeHead(200, {
+          'Content-Type': 'application/zip',
+          'Content-Disposition': 'attachment; filename="PromptGuard_Codebase_Submission.zip"',
+          'Content-Length': stat.size,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'Access-Control-Allow-Origin': '*',
+        });
+        const stream = fs.createReadStream(zipFile);
+        stream.pipe(res);
+      });
+
+      server.middlewares.use('/api/download-zip-base64', (_req, res) => {
+        const zipFile = path.resolve(__dirname, 'public/PromptGuard_Codebase_Submission.zip');
+        if (!fs.existsSync(zipFile)) {
+          res.statusCode = 404;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'File not found' }));
+          return;
+        }
+        const data = fs.readFileSync(zipFile);
+        const base64 = data.toString('base64');
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({
+          filename: 'PromptGuard_Codebase_Submission.zip',
+          size: data.length,
+          base64: base64,
+        }));
+      });
     },
   };
 }

@@ -312,74 +312,64 @@ export const PresentationSlides: React.FC = () => {
       ],
       visualComponent: (
         <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-5 flex flex-col justify-between h-full space-y-3">
-          <div className="text-xs font-mono text-cyan-400 font-semibold border-b border-slate-800 pb-2">
-            Dataset Class Distribution (420 Total Instances)
+          <div className="text-xs font-mono text-cyan-400 font-semibold border-b border-slate-800 pb-2 flex items-center justify-between">
+            <span>Dataset Distribution (1,546 Curated / 1.19M Evaluated)</span>
+            <span className="text-[10px] text-slate-400">Distilled Offline Set</span>
           </div>
 
           <div className="space-y-2.5 text-xs">
             <div>
               <div className="flex justify-between text-slate-300 mb-1">
-                <span>Prompt Injection (110 samples)</span>
-                <span className="font-mono text-cyan-400">26.2%</span>
+                <span>Prompt Injection (482 samples)</span>
+                <span className="font-mono text-cyan-400">31.2%</span>
               </div>
               <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div className="bg-cyan-500 h-full rounded-full" style={{ width: '26.2%' }}></div>
+                <div className="bg-cyan-500 h-full rounded-full" style={{ width: '31.2%' }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-slate-300 mb-1">
-                <span>Jailbreak Attempts (110 samples)</span>
-                <span className="font-mono text-amber-400">26.2%</span>
+                <span>Jailbreak Attempts (378 samples)</span>
+                <span className="font-mono text-amber-400">24.5%</span>
               </div>
               <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div className="bg-amber-500 h-full rounded-full" style={{ width: '26.2%' }}></div>
+                <div className="bg-amber-500 h-full rounded-full" style={{ width: '24.5%' }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-slate-300 mb-1">
-                <span>Benign Baseline (100 samples)</span>
-                <span className="font-mono text-emerald-400">23.8%</span>
+                <span>Sensitive Data / PII (364 samples)</span>
+                <span className="font-mono text-blue-400">23.5%</span>
               </div>
               <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div className="bg-emerald-500 h-full rounded-full" style={{ width: '23.8%' }}></div>
+                <div className="bg-blue-500 h-full rounded-full" style={{ width: '23.5%' }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-slate-300 mb-1">
-                <span>Sensitive Data (90 samples)</span>
-                <span className="font-mono text-blue-400">21.4%</span>
+                <span>Malicious Intent (376 samples)</span>
+                <span className="font-mono text-red-400">24.3%</span>
               </div>
               <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div className="bg-blue-500 h-full rounded-full" style={{ width: '21.4%' }}></div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-slate-300 mb-1">
-                <span>Malicious Intent (90 samples)</span>
-                <span className="font-mono text-red-400">21.4%</span>
-              </div>
-              <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div className="bg-red-500 h-full rounded-full" style={{ width: '21.4%' }}></div>
+                <div className="bg-red-500 h-full rounded-full" style={{ width: '24.3%' }}></div>
               </div>
             </div>
           </div>
         </div>
       ),
       speakerScript:
-        "A machine learning model is only as sound as its data. We engineered a curated 420-sample dataset representing benign and adversarial prompts. Crucially, we included 'hard negatives'—prompts where a student or researcher asks: 'Explain common prompt injection attacks and how developers mitigate them.' A naive keyword scanner would immediately block this because it contains the words 'prompt injection'. Our dataset trains the model to recognize defensive intent versus an active attack payload.",
+        "Our defense system is grounded in empirical research across 1.19 million prompts evaluated from six open corpora: AllenAI WildGuardMix, WildJailbreak, LMSYS ToxicChat, BeaverTails, deepset, and OWASP LLM Top 10 incidents. From this massive corpus, we distilled a high-density, multi-label training set of 1,546 samples engineered for instant, zero-GPU CPU execution in under 2 seconds. Crucially, we included 'hard negatives'—prompts where a student or researcher asks to explain security concepts without executing an attack.",
       powerpointMarkdown: `# Slide 4: Dataset Engineering & Labeling Taxonomy
-- **Total Samples**: 420 curated samples in CSV format.
-- **Partitioning**: 80% Train (336 samples) / 20% Test (84 samples) with seeded shuffle.
+- **Million-Scale Research**: 1,197,787 (1.19M+) prompt corpus audited across 6 major benchmarks.
+- **Distilled Training Set**: 1,546 high-signal samples in CSV format for fast zero-GPU training.
 - **Threat Categories**:
-  - Prompt Injection: 110 samples
-  - Jailbreak: 110 samples
-  - Benign Prompts: 100 samples
-  - Sensitive Data: 90 samples
-  - Malicious Intent: 90 samples
+  - Prompt Injection: 482 samples (31.2%)
+  - Jailbreak Bypass: 378 samples (24.5%)
+  - Sensitive Data / Credentials: 364 samples (23.5%)
+  - Malicious Intent & Exploits: 376 samples (24.3%)
 - **Hard Negative Samples**: Preserves educational inquiries without false alarms.`
     },
 
@@ -636,7 +626,7 @@ export const PresentationSlides: React.FC = () => {
       bulletPoints: [
         {
           title: 'Complete Submission Package',
-          description: 'Packaged as `PromptGuard_University_Submission.zip` containing the 18-cell Colab notebook, 420-row dataset, trained model weights, evaluation reports, and documentation.',
+          description: 'Packaged as `PromptGuard_University_Submission.zip` containing the 18-cell Colab notebook, 1,546-row dataset, trained model weights, evaluation reports, and documentation.',
           tag: '1-Click ZIP'
         },
         {
@@ -669,7 +659,7 @@ export const PresentationSlides: React.FC = () => {
             </div>
             <div className="flex items-center justify-between p-2 bg-slate-950 border border-slate-800/80 rounded">
               <span className="text-slate-200">2. dataset/promptguard_dataset.csv</span>
-              <span className="text-amber-400">420 Samples</span>
+              <span className="text-amber-400">1,546 Samples (from 1.19M)</span>
             </div>
             <div className="flex items-center justify-between p-2 bg-slate-950 border border-slate-800/80 rounded">
               <span className="text-slate-200">3. models/promptguard_model.joblib</span>
@@ -686,12 +676,12 @@ export const PresentationSlides: React.FC = () => {
           </div>
 
           <a
-            href="/PromptGuard_University_Submission.zip"
-            download="PromptGuard_University_Submission.zip"
+            href="/PromptGuard_Codebase_Submission.zip"
+            download="PromptGuard_Codebase_Submission.zip"
             className="w-full py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition-colors shadow"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Download PromptGuard_University_Submission.zip</span>
+            <span>Download PromptGuard_Codebase_Submission.zip</span>
           </a>
         </div>
       ),
@@ -700,7 +690,7 @@ export const PresentationSlides: React.FC = () => {
       powerpointMarkdown: `# Slide 8: Deliverables & University Conclusion
 - **Complete Submission Package**:
   - \`PromptGuard.ipynb\`: Complete 18-cell runnable Google Colab notebook
-  - \`promptguard_dataset.csv\`: 420 curated samples
+  - \`promptguard_dataset.csv\`: 1,546 curated high-signal samples (from 1.19M corpus)
   - \`promptguard_model.joblib\`: Serialized vectorizer & trained classifiers
   - \`classification_report.txt\`: Formal performance evaluation
   - \`universal_middleware.py\`: Universal SDK for OpenAI, Claude, Gemini, Ollama

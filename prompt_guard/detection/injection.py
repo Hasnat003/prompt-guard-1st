@@ -118,6 +118,11 @@ INJECTION_NGRAMS = [
 ]
 
 
+BENIGN_CODE_SYNTAX = re.compile(
+    r"(?:#\s*include\s*<|\bint\s+main\s*\(|\bdef\s+[a-zA-Z_]\w*\s*\(|\bprintf\s*\(|\bconsole\.log\s*\(|\bpublic\s+static\s+void|\breturn\s+0\s*;|\bconst\s+[a-zA-Z_]\w*\s*=|\bfunction\s+[a-zA-Z_]\w*\s*\()",
+    re.IGNORECASE,
+)
+
 def detect_prompt_injection(normalized_text: str, raw_text: str) -> DetectionDetail:
     matched_rules = []
     max_weight = 0.0
@@ -143,10 +148,16 @@ def detect_prompt_injection(normalized_text: str, raw_text: str) -> DetectionDet
     except Exception:
         ml_score = 0.0
 
+    is_pure_code = bool(BENIGN_CODE_SYNTAX.search(normalized_text)) and len(matched_rules) == 0 and ngram_score < 0.20
+
     final_confidence = max(max_weight, ml_score)
-    if len(matched_rules) > 1:
+    if is_pure_code:
+        # Harmless programming code with output comments is benign unless explicit injection directives exist
+        final_confidence = min(0.15, max_weight)
+        highest_severity = "low"
+    elif len(matched_rules) > 1:
         final_confidence = min(0.99, max_weight + 0.05 * (len(matched_rules) - 1))
-    elif len(matched_rules) == 0 and ml_score >= 0.50:
+    elif len(matched_rules) == 0 and ml_score >= 0.70:
         final_confidence = ml_score
         highest_severity = "critical" if ml_score >= 0.85 else "high"
         matched_rules.append(f"Multilabel ML Classifier detected adversarial prompt injection ({round(ml_score * 100, 1)}% confidence).")
@@ -155,7 +166,8 @@ def detect_prompt_injection(normalized_text: str, raw_text: str) -> DetectionDet
         highest_severity = "medium"
         matched_rules.append("Accumulation of instructional override n-grams detected.")
 
-    detected = final_confidence >= 0.50
+    detected = final_confidence >= 0.50 and not is_pure_code
+
     reason = (
         f"Identified {len(matched_rules)} injection vector(s): direct instruction override or delimiter manipulation."
         if detected
