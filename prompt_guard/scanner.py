@@ -104,14 +104,49 @@ class PromptGuard:
         # 3. Sensitive Data & PII Detection
         sensitive_detail, _, redacted_prompt = detect_sensitive_data(normalized.normalized)
 
-        # 4. Prompt Injection Detection
+        # 4. Machine Learning Multi-Output Inference
+        from prompt_guard.ml_engine import predict_ml_comprehensive
+        ml_analysis = predict_ml_comprehensive(normalized.normalized)
+        ml_probs = ml_analysis.get("probabilities", {})
+
+        # 5. Rule & Semantic Detections with ML Fusion
         injection_detail = detect_prompt_injection(normalized.normalized, normalized.raw)
-
-        # 5. Jailbreak Detection
         jailbreak_detail = detect_jailbreak(normalized.normalized, normalized.raw)
-
-        # 6. Harmful Intent Detection & Hard-Negative Disambiguation
         harmful_detail, is_educational_hard_neg = detect_harmful_intent(normalized.normalized, normalized.raw)
+
+        # Boost detection if statistical ML model detects threat with >= 35% probability (captures rephrasings and evasion tricks)
+        pi_prob = ml_probs.get("prompt_injection", 0.0)
+        if pi_prob >= 0.35:
+            injection_detail.detected = True
+            injection_detail.confidence = max(injection_detail.confidence, pi_prob)
+            injection_detail.severity = "critical" if pi_prob >= 0.75 else ("high" if pi_prob >= 0.50 else "medium")
+            if injection_detail.detector_source == "rule_heuristic":
+                injection_detail.detector_source = "hybrid"
+            elif not injection_detail.evidence:
+                injection_detail.detector_source = "ml_classifier"
+                injection_detail.evidence.append(f"Trained ML Model: Statistical injection signature ({round(pi_prob * 100, 1)}% prob)")
+
+        jb_prob = ml_probs.get("jailbreak", 0.0)
+        if jb_prob >= 0.35:
+            jailbreak_detail.detected = True
+            jailbreak_detail.confidence = max(jailbreak_detail.confidence, jb_prob)
+            jailbreak_detail.severity = "critical" if jb_prob >= 0.75 else ("high" if jb_prob >= 0.50 else "medium")
+            if jailbreak_detail.detector_source == "rule_heuristic":
+                jailbreak_detail.detector_source = "hybrid"
+            elif not jailbreak_detail.evidence:
+                jailbreak_detail.detector_source = "ml_classifier"
+                jailbreak_detail.evidence.append(f"Trained ML Model: Adversarial persona or virtualization framing ({round(jb_prob * 100, 1)}% prob)")
+
+        mi_prob = ml_probs.get("malicious_intent", 0.0)
+        if mi_prob >= 0.35:
+            harmful_detail.detected = True
+            harmful_detail.confidence = max(harmful_detail.confidence, mi_prob)
+            harmful_detail.severity = "critical" if mi_prob >= 0.75 else ("high" if mi_prob >= 0.50 else "medium")
+            if harmful_detail.detector_source == "rule_heuristic":
+                harmful_detail.detector_source = "hybrid"
+            elif not harmful_detail.evidence:
+                harmful_detail.detector_source = "ml_classifier"
+                harmful_detail.evidence.append(f"Trained ML Model: Malicious payload objective ({round(mi_prob * 100, 1)}% prob)")
 
         detections = [
             injection_detail,
@@ -120,12 +155,12 @@ class PromptGuard:
             harmful_detail,
         ]
 
-        # 7. Calibrated Risk Score
+        # 6. Calibrated Risk Score
         risk_score, risk_level, _ = calculate_calibrated_risk_score(
             detections, normalized, is_educational_hard_neg
         )
 
-        # 8. Policy Evaluation
+        # 7. Policy Evaluation
         action, action_reason, recommendation = evaluate_policy(
             risk_score, risk_level, detections, self.policy, is_educational_hard_neg
         )
@@ -147,6 +182,7 @@ class PromptGuard:
             recommendation=recommendation,
             redacted_prompt=redacted_prompt,
             educational_hard_negative=is_educational_hard_neg,
+            ml_analysis=ml_analysis,
         )
 
 

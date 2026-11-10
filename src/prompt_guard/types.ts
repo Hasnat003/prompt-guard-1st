@@ -7,7 +7,8 @@ export type ThreatCategory =
   | 'prompt_injection'
   | 'jailbreak'
   | 'sensitive_data'
-  | 'harmful_intent';
+  | 'harmful_intent'
+  | 'malicious_intent';
 
 export type DecisionAction = 'ALLOW' | 'BLOCK' | 'REVIEW';
 
@@ -75,6 +76,8 @@ export interface SecurityPolicy {
   maxPromptLength: number;
 }
 
+import { MLPredictionResult } from './ml_engine';
+
 export interface ScanResult {
   request_id: string;
   timestamp: string;
@@ -90,6 +93,7 @@ export interface ScanResult {
   recommendation: string;
   redacted_prompt: string;
   educational_hard_negative: boolean;
+  ml_analysis?: MLPredictionResult;
 }
 
 export interface BenchmarkSample {

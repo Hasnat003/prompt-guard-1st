@@ -99,6 +99,34 @@ const INJECTION_RULES: InjectionRule[] = [
     description: 'Zero-click markdown image URL parameter exfiltration channel.',
     severity: 'critical',
   },
+  {
+    id: 'INJ_DECISION_EVALUATION_HIJACK',
+    pattern: /\b(?:rate|score|grade|evaluate|judge|mark|rank|recommend)\s+(?:them|this|the\s+candidate|him|her|it|user|applicant|resume|profile|submission|paper)?\s*(?:as\s+)?(?:\d+\/\d+|\d+|10\/10|100%|perfect|highest|a\+|\d+\s*stars?)\s+regardless\s+of\s+(?:the\s+)?(?:content|context|merit|qualifications?|actual|reality|facts|data|text|input|truth|negative)\b/i,
+    weight: 0.96,
+    description: 'Decision hijacking attack forcing arbitrary evaluation or maximum rating regardless of content.',
+    severity: 'critical',
+  },
+  {
+    id: 'INJ_CONCEALMENT_SECRECY_DIRECTIVE',
+    pattern: /\b(?:do\s+not|don'?t|never)\s+(?:mention|reveal|disclose|show|tell|state|indicate|acknowledge|include|leak|output)\s+(?:this|the|any)\s+(?:note|instruction|directive|prompt|rule|message|override|text|comment|request|command)\b/i,
+    weight: 0.94,
+    description: 'Anti-transparency concealment directive instructing AI to hide prompt manipulation from operators.',
+    severity: 'critical',
+  },
+  {
+    id: 'INJ_INDIRECT_DOCUMENT_EMBEDDED',
+    pattern: /\b(?:while|when)\s+(?:reading|analyzing|parsing|summarizing|processing|evaluating|reviewing)\s+(?:this|the)\s+(?:resume|document|cv|file|email|text|profile|review|article|submission),?\s*(?:note|remember|ensure|always|make\s+sure):?\s*(?:the\s+candidate|this\s+is|give|rate|score|approve|ignore|override|grant|consider)\b/i,
+    weight: 0.92,
+    description: 'Embedded indirect prompt injection hidden within document/resume context.',
+    severity: 'high',
+  },
+  {
+    id: 'INJ_REGARDLESS_OVERRIDE',
+    pattern: /\bregardless\s+of\s+(?:the\s+)?(?:content|context|merit|qualifications?|truth|actual|negative|facts|data|text|input)\b/i,
+    weight: 0.88,
+    description: 'Unconditional evaluation override attempting to force favorable output regardless of context.',
+    severity: 'high',
+  },
 ];
 
 // Contextual n-grams indicative of prompt-injection framing
@@ -113,6 +141,11 @@ const INJECTION_NGRAMS: Array<{ ngram: RegExp; weight: number }> = [
   { ngram: /\breplace them with the instructions\b/i, weight: 0.65 },
   { ngram: /\binstructions in this message\b/i, weight: 0.45 },
   { ngram: /\bnull and void\b/i, weight: 0.50 },
+  { ngram: /\bregardless of content\b/i, weight: 0.70 },
+  { ngram: /\bdo not mention this\b/i, weight: 0.65 },
+  { ngram: /\brate them 10\/10\b/i, weight: 0.70 },
+  { ngram: /\bthe candidate is the best fit\b/i, weight: 0.55 },
+  { ngram: /\bwhile reading this resume\b/i, weight: 0.50 },
 ];
 
 export function detectPromptInjection(

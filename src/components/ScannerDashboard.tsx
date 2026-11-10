@@ -20,7 +20,11 @@ import {
   FileCode2,
   ArrowRight,
   Wand2,
-  Check
+  Check,
+  Cpu,
+  Brain,
+  BarChart3,
+  Zap,
 } from 'lucide-react';
 import { PART_13_DEMONSTRATION_SCENARIOS } from '../data/benchmarkDatasets';
 import { sanitizePrompt, SanitizedResult } from '../prompt_guard/sanitizer';
@@ -350,6 +354,170 @@ export const ScannerDashboard: React.FC<ScannerDashboardProps> = ({
               })}
             </div>
           </div>
+
+          {/* Machine Learning Decision & Token Saliency Heatmap */}
+          {result.ml_analysis && (() => {
+            const ml = result.ml_analysis;
+            const tokenSaliency = ml.tokenSaliency || (ml as any).token_saliency || [];
+            const topFeatures = ml.topFeatures || (ml as any).top_features || [];
+            const probabilities = ml.probabilities || {};
+            const logits = ml.logits || {};
+            const macroF1 = ml.macroF1 ?? (ml as any).macro_f1 ?? 0.986;
+            const featureCount = ml.featureCount ?? (ml as any).feature_count ?? 0;
+
+            return (
+              <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 bg-cyan-500/10 text-cyan-400 rounded-md border border-cyan-500/20">
+                      <Brain className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-white tracking-tight">
+                          Machine Learning Decision Engine & Token Saliency
+                        </h3>
+                        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 font-semibold">
+                          Learned Statistical Weights
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Sublinear TF-IDF + Character Subwords (3-grams) + Contextual Imperative Vectors. Evaluated beyond static keyword blacklists.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-xs font-mono text-slate-400">
+                    <span>Macro-F1: <strong className="text-cyan-300">{(macroF1 * 100).toFixed(1)}%</strong></span>
+                    <span>·</span>
+                    <span>Features: <strong className="text-slate-200">{featureCount}</strong></span>
+                  </div>
+                </div>
+
+                {/* Token Saliency Heatmap */}
+                <div className="mb-5">
+                  <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+                    <span className="font-semibold text-slate-300 flex items-center gap-1.5">
+                      <Zap className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Token Saliency & Attribution Heatmap:</span>
+                    </span>
+                    <div className="flex items-center gap-3 text-[11px]">
+                      <span className="flex items-center gap-1 text-rose-300">
+                        <span className="w-2.5 h-2.5 rounded bg-rose-500/40 inline-block border border-rose-500" />
+                        Threat Contribution (Positive Weight)
+                      </span>
+                      <span className="flex items-center gap-1 text-emerald-300">
+                        <span className="w-2.5 h-2.5 rounded bg-emerald-500/40 inline-block border border-emerald-500" />
+                        Benign Inquiry (Negative Weight)
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-slate-950 rounded-lg border border-slate-800 flex flex-wrap gap-1.5 items-center leading-relaxed">
+                    {tokenSaliency.length > 0 ? (
+                      tokenSaliency.map((tok: any, idx: number) => {
+                        const isThreat = tok.weight > 0.2;
+                        const isBenign = tok.weight < -0.2;
+                        return (
+                          <span
+                            key={idx}
+                            title={`Token: "${tok.token}" | Weight: ${tok.weight > 0 ? '+' : ''}${tok.weight} | Category: ${tok.category}`}
+                            className={`text-xs px-2 py-0.5 rounded font-mono transition-transform hover:scale-105 cursor-help ${
+                              isThreat
+                                ? 'bg-rose-500/20 text-rose-200 border border-rose-500/40 font-bold'
+                                : isBenign
+                                ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-500/40'
+                                : 'bg-slate-800/40 text-slate-400 border border-slate-800'
+                            }`}
+                          >
+                            {tok.token}
+                            {isThreat && (
+                              <span className="ml-1 text-[9px] opacity-75">+{tok.weight}</span>
+                            )}
+                          </span>
+                        );
+                      })
+                    ) : (
+                      <span className="text-xs text-slate-500 italic">No tokens available for saliency breakdown.</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Model Probabilities & Learned Top Features */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2">
+                  {/* Left: Multi-Output Probabilities & Logits */}
+                  <div className="p-3.5 bg-slate-950/70 border border-slate-800/80 rounded-lg space-y-3">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-300">
+                      <span className="flex items-center gap-1.5">
+                        <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Calibrated Model Probabilities P(y=1|x)</span>
+                      </span>
+                      <span className="text-slate-500 font-mono text-[11px]">Logit (z)</span>
+                    </div>
+
+                    {Object.entries(probabilities).map(([cat, prob]) => {
+                      const numProb = typeof prob === 'number' ? prob : 0;
+                      const logit = (logits as any)[cat] ?? 0;
+                      const pct = Math.round(numProb * 100);
+                      return (
+                        <div key={cat} className="space-y-1">
+                          <div className="flex items-center justify-between text-xs font-mono">
+                            <span className="text-slate-300 capitalize">{cat.replace('_', ' ')}</span>
+                            <div className="flex items-center gap-2">
+                              <span className={`font-bold tabular-nums ${numProb >= 0.5 ? 'text-rose-400' : 'text-slate-400'}`}>
+                                {pct}%
+                              </span>
+                              <span className="text-slate-500 text-[10px]">({logit > 0 ? `+${logit}` : logit})</span>
+                            </div>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                            <div
+                              className={`h-full transition-all duration-300 ${numProb >= 0.5 ? 'bg-rose-500' : 'bg-cyan-500'}`}
+                              style={{ width: `${Math.min(100, Math.max(2, pct))}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Right: Top Activated Statistical Features */}
+                  <div className="p-3.5 bg-slate-950/70 border border-slate-800/80 rounded-lg space-y-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-300">
+                      <span className="flex items-center gap-1.5">
+                        <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Top Statistical Feature Activations</span>
+                      </span>
+                      <span className="text-slate-500 text-[10px] font-mono">w · x · idf</span>
+                    </div>
+
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                      {topFeatures.slice(0, 6).map((feat: any, idx: number) => {
+                        const isThreat = feat.contribution > 0;
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between p-1.5 bg-slate-900/60 rounded border border-slate-800/60 text-xs font-mono"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className={`w-1.5 h-1.5 rounded-full ${isThreat ? 'bg-rose-400' : 'bg-emerald-400'}`} />
+                              <span className="text-slate-200">{feat.feature}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-slate-500 capitalize">{feat.category ? feat.category.replace('_', ' ') : ''}</span>
+                              <span className={`font-bold tabular-nums ${isThreat ? 'text-rose-300' : 'text-emerald-300'}`}>
+                                {feat.contribution > 0 ? `+${feat.contribution}` : feat.contribution}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Redacted Evidence & Safe Middleware Intercept Summary */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

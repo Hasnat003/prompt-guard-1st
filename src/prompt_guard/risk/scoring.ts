@@ -62,6 +62,15 @@ export function calculateCalibratedRiskScore(
     }
   }
 
+  // Continuous Statistical Threat Floor:
+  // Catches rephrased prompts and indirect evasion tricks that register intermediate confidence (>= 35%)
+  const maxConfidence = detections.length > 0 ? Math.max(...detections.map(d => d.confidence)) : 0;
+  const continuousMLRisk = Number((maxConfidence * 100).toFixed(1));
+  if (continuousMLRisk >= 35.0 && baseScore < continuousMLRisk) {
+    baseScore = continuousMLRisk;
+    breakdown.push(`Statistical ML threat signature (${(maxConfidence * 100).toFixed(0)}% confidence: floor ${continuousMLRisk} pts)`);
+  }
+
   // Overlapping threat compounding: an attack combining injection + secret exposure is exponentially riskier
   if (detectedThreats.length > 1) {
     const synergyBonus = Number(Math.min(25.0, (detectedThreats.length - 1) * 12.5).toFixed(1));

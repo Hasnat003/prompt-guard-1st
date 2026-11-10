@@ -118,11 +118,13 @@ export function evaluatePolicy(
   }
 
   if (policy.blockOnHarmfulIntent && detectedHarmful && !isEducationalHardNegative) {
-    return {
-      action: 'BLOCK',
-      action_reason: 'Policy block enforced: active harmful intent or weaponization vector identified.',
-      recommendation: 'Reject request and log security event. Do not forward offensive payload to downstream model.',
-    };
+    if ((detectedHarmful.severity === 'high' || detectedHarmful.severity === 'critical') && (detectedHarmful.confidence >= 0.70 || detectedHarmful.detectorSource === 'rule_heuristic' || detectedHarmful.detectorSource === 'hybrid')) {
+      return {
+        action: 'BLOCK',
+        action_reason: 'Policy block enforced: active harmful intent or weaponization vector identified.',
+        recommendation: 'Reject request and log security event. Do not forward offensive payload to downstream model.',
+      };
+    }
   }
 
   // Threshold-based scoring decision

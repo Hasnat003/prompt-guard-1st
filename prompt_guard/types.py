@@ -120,6 +120,7 @@ class ScanResult:
     recommendation: str
     redacted_prompt: str
     educational_hard_negative: bool
+    ml_analysis: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -137,4 +138,5 @@ class ScanResult:
             "recommendation": self.recommendation,
             "redacted_prompt": self.redacted_prompt,
             "educational_hard_negative": self.educational_hard_negative,
+            "ml_analysis": self.ml_analysis,
         }

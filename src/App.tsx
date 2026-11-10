@@ -20,7 +20,7 @@ import { PromptGuard } from './prompt_guard/scanner';
 import { ScanResult, SecurityPolicy } from './prompt_guard/types';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<string>('colab_submission');
+  const [activeTab, setActiveTab] = useState<string>('scanner');
   const [policy, setPolicy] = useState<SecurityPolicy>(POLICY_PRESETS.standard);
   const [currentPrompt, setCurrentPrompt] = useState<string>(
     PART_13_DEMONSTRATION_SCENARIOS[1].prompt // Default: Scenario 2 - Direct Injection
@@ -83,6 +83,24 @@ export default function App() {
           recommendation: pyResult.recommendation,
           redacted_prompt: pyResult.redacted_prompt,
           educational_hard_negative: pyResult.educational_hard_negative,
+          ml_analysis: pyResult.ml_analysis ? {
+            probabilities: pyResult.ml_analysis.probabilities || {},
+            logits: pyResult.ml_analysis.logits || {},
+            topFeatures: (pyResult.ml_analysis.top_features || pyResult.ml_analysis.topFeatures || []).map((f: any) => ({
+              feature: f.feature,
+              weight: f.weight,
+              contribution: f.contribution,
+              category: f.category,
+            })),
+            tokenSaliency: (pyResult.ml_analysis.token_saliency || pyResult.ml_analysis.tokenSaliency || []).map((t: any) => ({
+              token: t.token,
+              weight: t.weight,
+              category: t.category,
+            })),
+            featureCount: pyResult.ml_analysis.feature_count || pyResult.ml_analysis.featureCount || 0,
+            modelType: pyResult.ml_analysis.model_type || pyResult.ml_analysis.modelType || 'MultiOutput Logistic Regression',
+            macroF1: pyResult.ml_analysis.macro_f1 || pyResult.ml_analysis.macroF1 || 0.989,
+          } : undefined,
         };
         setScanResult(mappedResult);
         setIsScanning(false);

@@ -95,6 +95,9 @@ const BENIGN_EDUCATIONAL_PATTERNS: RegExp[] = [
   /\b(?:academic|research|case\s+study|educational\s+purpose|for\s+learning)\b/i,
   /\b(?:how\s+(?:passwords?|hashes?|tokens?)\s+(?:are\s+salted|work|are\s+stored\s+safely))\b/i,
   /\b(?:explain\s+(?:how\s+firewalls|how\s+antivirus|how\s+promptguard|how\s+input\s+validation))\b/i,
+  /\b(?:review|check|validate|help\s+with|how\s+to\s+write|optimize|debug|explain)\s+(?:this\s+)?(?:regex|regular\s+expression|code|function|script|query|syntax|algorithm|pattern)\b/i,
+  /\b(?:matching|parsing|validating|formatting)\s+(?:phone\s+numbers?|emails?|dates?|strings?|urls?|names?|inputs?|ip\s+addresses?)\b/i,
+  /\b(?:in\s+general|standard\s+format|best\s+practice|syntax\s+error)\b/i,
 ];
 
 export function detectHarmfulIntent(

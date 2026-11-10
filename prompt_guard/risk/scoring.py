@@ -45,6 +45,14 @@ def calculate_calibrated_risk_score(
                 f"{det.category_label}: confidence {int(det.confidence * 100)}%, severity {det.severity.upper()} (+{contribution} pts)"
             )
 
+    # Continuous Statistical Threat Floor:
+    # Catches rephrased prompts and indirect evasion tricks that register intermediate confidence (>= 35%)
+    max_confidence = max((d.confidence for d in detections), default=0.0)
+    continuous_ml_risk = round(max_confidence * 100.0, 1)
+    if continuous_ml_risk >= 35.0 and base_score < continuous_ml_risk:
+        base_score = continuous_ml_risk
+        breakdown.append(f"Statistical ML threat signature ({int(max_confidence * 100)}% confidence: floor {continuous_ml_risk} pts)")
+
     # Multi-threat compounding synergy
     if len(detected_threats) > 1:
         synergy = round(min(25.0, (len(detected_threats) - 1) * 12.5), 1)

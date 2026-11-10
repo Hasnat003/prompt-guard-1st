@@ -13,9 +13,10 @@ import { detectPromptInjection } from './detection/injection';
 import { detectJailbreak } from './detection/jailbreak';
 import { detectSensitiveData } from './detection/sensitive_data';
 import { inspectAndNormalize } from './preprocessing';
+import { defaultMLEngine } from './ml_engine';
 import { evaluatePolicy, POLICY_PRESETS } from './risk/policy';
 import { calculateCalibratedRiskScore } from './risk/scoring';
-import { ScanResult, SecurityPolicy } from './types';
+import { DetectionDetail, ScanResult, SecurityPolicy } from './types';
 import { validateInput } from './validation';
 
 let requestCounter = 1;
@@ -100,30 +101,72 @@ export class PromptGuard {
     // 3. Sensitive Data & PII Detection
     const sensitiveResult = detectSensitiveData(normalizedInput.normalized);
 
-    // 4. Prompt Injection Detection
+    // 4. Client-Side Machine Learning Inference
+    const mlAnalysis = defaultMLEngine.predict(normalizedInput.normalized);
+
+    // 5. Detection Engines with ML Fusion
     const injectionResult = detectPromptInjection(normalizedInput.normalized, normalizedInput.raw);
-
-    // 5. Jailbreak Detection
     const jailbreakResult = detectJailbreak(normalizedInput.normalized, normalizedInput.raw);
-
-    // 6. Harmful Intent & Benign Hard-Negative Disambiguation
     const harmfulResult = detectHarmfulIntent(normalizedInput.normalized, normalizedInput.raw);
 
-    const detections = [
-      injectionResult,
-      jailbreakResult,
+    // Fuse ML probabilities into detections (generalizing beyond static keyword rules)
+    const piProb = mlAnalysis.probabilities.prompt_injection;
+    const fusedInjection: DetectionDetail = {
+      ...injectionResult,
+      confidence: Math.max(injectionResult.confidence, piProb),
+      detected: injectionResult.detected || piProb >= 0.35,
+      severity: piProb >= 0.75 ? 'critical' : (piProb >= 0.50 ? 'high' : (injectionResult.detected ? injectionResult.severity : 'medium')),
+      detectorSource: injectionResult.detected ? 'hybrid' : (piProb >= 0.35 ? 'ml_classifier' : injectionResult.detectorSource),
+      evidence: injectionResult.detected
+        ? injectionResult.evidence
+        : (piProb >= 0.35
+            ? [`ML Statistical Model: Statistical injection signature (${(piProb * 100).toFixed(1)}% prob)`]
+            : injectionResult.evidence),
+    };
+
+    const jbProb = mlAnalysis.probabilities.jailbreak;
+    const fusedJailbreak: DetectionDetail = {
+      ...jailbreakResult,
+      confidence: Math.max(jailbreakResult.confidence, jbProb),
+      detected: jailbreakResult.detected || jbProb >= 0.35,
+      severity: jbProb >= 0.75 ? 'critical' : (jbProb >= 0.50 ? 'high' : (jailbreakResult.detected ? jailbreakResult.severity : 'medium')),
+      detectorSource: jailbreakResult.detected ? 'hybrid' : (jbProb >= 0.35 ? 'ml_classifier' : jailbreakResult.detectorSource),
+      evidence: jailbreakResult.detected
+        ? jailbreakResult.evidence
+        : (jbProb >= 0.35
+            ? [`ML Statistical Model: Adversarial persona or virtualization framing (${(jbProb * 100).toFixed(1)}% prob)`]
+            : jailbreakResult.evidence),
+    };
+
+    const miProb = mlAnalysis.probabilities.malicious_intent;
+    const fusedHarmful: DetectionDetail = {
+      ...harmfulResult.detail,
+      confidence: Math.max(harmfulResult.detail.confidence, miProb),
+      detected: harmfulResult.detail.detected || miProb >= 0.35,
+      severity: miProb >= 0.75 ? 'critical' : (miProb >= 0.50 ? 'high' : (harmfulResult.detail.detected ? harmfulResult.detail.severity : 'medium')),
+      detectorSource: harmfulResult.detail.detected ? 'hybrid' : (miProb >= 0.35 ? 'ml_classifier' : harmfulResult.detail.detectorSource),
+      evidence: harmfulResult.detail.detected
+        ? harmfulResult.detail.evidence
+        : (miProb >= 0.35
+            ? [`ML Statistical Model: Malicious payload objective (${(miProb * 100).toFixed(1)}% prob)`]
+            : harmfulResult.detail.evidence),
+    };
+
+    const detections: DetectionDetail[] = [
+      fusedInjection,
+      fusedJailbreak,
       sensitiveResult.detail,
-      harmfulResult.detail,
+      fusedHarmful,
     ];
 
-    // 7. Calibrated Risk Score Calculation
+    // 6. Calibrated Risk Score Calculation
     const riskAssessment = calculateCalibratedRiskScore(
       detections,
       normalizedInput,
       harmfulResult.isEducationalHardNegative
     );
 
-    // 8. Policy Evaluation & Decision Engine
+    // 7. Policy Evaluation & Decision Engine
     const decision = evaluatePolicy(
       riskAssessment.score,
       riskAssessment.level,
@@ -150,6 +193,7 @@ export class PromptGuard {
       recommendation: decision.recommendation,
       redacted_prompt: sensitiveResult.redactedText,
       educational_hard_negative: harmfulResult.isEducationalHardNegative,
+      ml_analysis: mlAnalysis,
     };
   }
 }

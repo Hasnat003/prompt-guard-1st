@@ -1,6 +1,6 @@
 {
   "model_type": "TF-IDF + Logistic Regression Baseline",
-  "trained_date": "2026-11-09 07:11:28",
+  "trained_date": "2026-11-10 09:10:04",
   "vocab_size": 269,
   "accuracy": 0.9474,
   "f1": 0.963,

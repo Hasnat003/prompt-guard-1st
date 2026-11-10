@@ -70,6 +70,34 @@ INJECTION_PATTERNS = [
         "description": "Zero-click markdown image URL parameter exfiltration channel.",
         "severity": "critical",
     },
+    {
+        "id": "INJ_DECISION_EVALUATION_HIJACK",
+        "regex": re.compile(r"\b(?:rate|score|grade|evaluate|judge|mark|rank|recommend)\s+(?:them|this|the\s+candidate|him|her|it|user|applicant|resume|profile|submission|paper)?\s*(?:as\s+)?(?:\d+\/\d+|\d+|10\/10|100%|perfect|highest|a\+|\d+\s*stars?)\s+regardless\s+of\s+(?:the\s+)?(?:content|context|merit|qualifications?|actual|reality|facts|data|text|input|truth|negative)\b", re.IGNORECASE),
+        "weight": 0.96,
+        "description": "Decision hijacking attack forcing arbitrary evaluation or maximum rating regardless of content.",
+        "severity": "critical",
+    },
+    {
+        "id": "INJ_CONCEALMENT_SECRECY_DIRECTIVE",
+        "regex": re.compile(r"\b(?:do\s+not|don'?t|never)\s+(?:mention|reveal|disclose|show|tell|state|indicate|acknowledge|include|leak|output)\s+(?:this|the|any)\s+(?:note|instruction|directive|prompt|rule|message|override|text|comment|request|command)\b", re.IGNORECASE),
+        "weight": 0.94,
+        "description": "Anti-transparency concealment directive instructing AI to hide prompt manipulation from operators.",
+        "severity": "critical",
+    },
+    {
+        "id": "INJ_INDIRECT_DOCUMENT_EMBEDDED",
+        "regex": re.compile(r"\b(?:while|when)\s+(?:reading|analyzing|parsing|summarizing|processing|evaluating|reviewing)\s+(?:this|the)\s+(?:resume|document|cv|file|email|text|profile|review|article|submission),?\s*(?:note|remember|ensure|always|make\s+sure):?\s*(?:the\s+candidate|this\s+is|give|rate|score|approve|ignore|override|grant|consider)\b", re.IGNORECASE),
+        "weight": 0.92,
+        "description": "Embedded indirect prompt injection hidden within document/resume context.",
+        "severity": "high",
+    },
+    {
+        "id": "INJ_REGARDLESS_OVERRIDE",
+        "regex": re.compile(r"\bregardless\s+of\s+(?:the\s+)?(?:content|context|merit|qualifications?|truth|actual|negative|facts|data|text|input)\b", re.IGNORECASE),
+        "weight": 0.88,
+        "description": "Unconditional evaluation override attempting to force favorable output regardless of context.",
+        "severity": "high",
+    },
 ]
 
 INJECTION_NGRAMS = [
@@ -82,6 +110,11 @@ INJECTION_NGRAMS = [
     (re.compile(r"\breplace them with the instructions\b", re.IGNORECASE), 0.65),
     (re.compile(r"\binstructions in this message\b", re.IGNORECASE), 0.45),
     (re.compile(r"\bnull and void\b", re.IGNORECASE), 0.50),
+    (re.compile(r"\bregardless of content\b", re.IGNORECASE), 0.70),
+    (re.compile(r"\bdo not mention this\b", re.IGNORECASE), 0.65),
+    (re.compile(r"\brate them 10/10\b", re.IGNORECASE), 0.70),
+    (re.compile(r"\bthe candidate is the best fit\b", re.IGNORECASE), 0.55),
+    (re.compile(r"\bwhile reading this resume\b", re.IGNORECASE), 0.50),
 ]
 
 

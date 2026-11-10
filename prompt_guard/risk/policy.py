@@ -111,11 +111,12 @@ def evaluate_policy(
         )
 
     if policy.block_on_harmful_intent and harmful and not is_educational_hard_negative:
-        return (
-            "BLOCK",
-            "Policy block enforced: active harmful intent or weaponization vector identified.",
-            "Reject request and log security event.",
-        )
+        if harmful.severity in ["high", "critical"] and (harmful.confidence >= 0.70 or harmful.detector_source in ["rule_heuristic", "hybrid"]):
+            return (
+                "BLOCK",
+                "Policy block enforced: active harmful intent or weaponization vector identified.",
+                "Reject request and log security event.",
+            )
 
     if risk_score >= policy.block_threshold:
         return (
